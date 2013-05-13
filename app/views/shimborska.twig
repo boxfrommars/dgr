@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="/css/shimborska.style.css" media="screen" />
+    <script type="text/javascript" src="/vendor/jquery-1.3.2.js"></script>
+    <script type="text/javascript" src="/js/shimborska.script.js"></script>
+    <title>Вислава Шимборская. {{ title }}</title>
+</head>
+
+<body>
+
+<div id="wrap">
+    <div id="bar">
+        {% if currentPage == '/' %}
+            <h1><span class="pseudo-anchor">Вислава Шимборская</span>&nbsp;&nbsp;<span class="book-title">Стихотворения</span></h1>
+        {% else %}
+            <h1><a href="/" class="pseudo-anchor">Вислава Шимборская</a>&nbsp;&nbsp;<span class="book-title">Стихотворения</span></h1>
+        {% endif %}
+        {% if currentPage == 'project' %}
+            <span class="head-nav">о проекте</span>
+        {% else %}
+            <a href="/project" class="head-nav">о проекте</a>
+        {% endif %}
+    </div>
+    <div id="main">
+        <div id="leftbar">
+            <ul id="navigation">
+                <li><a href="#content" class="show-content-link">Содержание</a></li>
+                {% if currentPage == 'author' %}
+                    <li><span>Об авторе</span></li>
+                {% else %}
+                    <li><a href="/author">Об авторе</a></li>
+                {% endif %}
+            </ul>
+            {{ images|raw }}
+        </div>
+        <div class="page">
+            {{ content|raw }}
+            <ul id="pager">
+                {% if currentPage == '/' %}
+                    <li id="center-bottom-nav" class="first"><span>Обложка</span><span class="shortkey"></span></li>
+                {% else %}
+                    <li class="first"><a href="/">Обложка</a><span class="shortkey">(ctrl + ↓)</span></li>
+                {% endif %}
+                {% for key, pagerItem in pager.content %}
+                    {% if pagerItem.class != 'frontpage' %}
+                        {%  if pager.id == key %}
+                            <li id="center-bottom-nav"><span>{{ key }}</span></li>
+                        {% else %}
+                            <li><a title="{{ pagerItem.title }}" href="/{{ pagerItem.parent }}/{{ pagerItem.href }}">{{ key }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <li class="last"><a href="#" class="show-content-link">Содержание</a><span class="shortkey">(ctrl + ↑)</span></li>
+            </ul>
+        </div>
+
+        <div class="notabene">
+            {{ notes|raw }}
+        </div>
+
+        <div id="content" title="Содержание">
+            <ul id="contents-wrap">
+                {% if currentPage == '/' %}
+                <li class="chapter-link-list wide"><span class="chapter-link active">Обложка</span></li>
+                {% else %}
+                <li class="chapter-link-list wide"><a href="/" class="chapter-link">Обложка</a></li>
+                {% endif %}
+                {% for collectionItem in contentTable %}
+                    {% if collectionItem.href != '/' %}
+                    <li class="chapter-link-list">
+                        <span class="chapter-link">{{ collectionItem.title }}</span>
+                        <ul>
+                            {% for contentItem in collectionItem.items %}
+                                {% if currentPage == (collectionItem.href ~ '/' ~ contentItem.href) %}
+                                    <li><span class="active">{{ contentItem.title }}</span></li>
+                                {% else %}
+                                    <li><a href="/{{ collectionItem.href }}/{{ contentItem.href }}">{{ contentItem.title }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div id="royklogo"></div>
+</div>
+<div id="footer">
+    &copy; 2009 Студия «Гриб-дождевик»
+</div>
+</body>
+</html>
