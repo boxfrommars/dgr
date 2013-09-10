@@ -1,10 +1,16 @@
 {
     "require": {
-        "silex/silex": "~1.0",
-        "monolog/monolog": ">=1.0.0",
+        "silex/silex": "1.*",
+        "monolog/monolog": "1.6.*@dev",
         "twig/twig": ">=1.8,<2.0-dev",
-        "symfony/twig-bridge": "~2.3"
+        "symfony/twig-bridge": "~2.3",
+        "doctrine/dbal": "2.4.*@dev"
 
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "Dgr": "src/"
+        }
+    }
 }

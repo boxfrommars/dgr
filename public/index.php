@@ -6,74 +6,65 @@
 $startTime = microtime(true);
 $loader = require_once __DIR__ . '/../vendor/autoload.php';
 
-/** @var Silex\Application $app [@var TwigServiceProvider $twig] */
-$app = new Silex\Application();
-
-$app['debug'] = true;
-
-$app['root_path'] = realpath(__DIR__ . '/..');
-$app['application_path'] = $app['root_path'] . '/app';
-$app['controllers_path'] = $app['application_path'] . '/controllers';
-$app['tmp_path'] = $app['root_path'] . '/tmp';
-$app['vendor_path'] = $app['root_path'] . '/vendor';
-
-$app['config'] = array(
-    'host' => 'dgr.dev',
-    'db' => array(
-        'db.options' => array(
-            'driver' => 'pdo_pgsql',
-            'host' => 'localhost',
-            'dbname' => 'rekada',
-            'user' => 'rekada',
-            'password' => 'rekada',
+$app = new \Dgr\DgrApplication(array(
+    'starttime' => $startTime,
+    'debug' => true,
+    'tmp_path' => '../tmp',
+    'is_cache' => false,
+    'application_path' => realpath(__DIR__ . '/..') . '/app',
+    'config' => array(
+        'db' => array(
+            'db.options' => array(
+                'driver' => 'pdo_pgsql',
+                'host' => 'localhost',
+                'dbname' => 'dgr',
+                'user' => 'dgr',
+                'password' => 'dgr',
+            ),
         ),
     ),
-    'twig' => array(
-        'twig.path' => $app['application_path'] . '/views',
-        'twig.options' => array(
-            'cache' => $app['tmp_path'] . '/cache/twig',
-            'debug' => $app['debug'],
-        ),
-    ),
-    'monolog' => array(
-        'monolog.logfile' => $app['tmp_path'] . '/dev.log',
-        'monolog.level' => $app['debug'] ? \Monolog\Logger::DEBUG : \Monolog\Logger::INFO,
-    )
-);
+));
 
-$loader->add('App', $app['application_path']);
+$app->register(new \Dgr\PagesServiceProvider(), array());
 
-$app->register(new Silex\Provider\MonologServiceProvider(), $app['config']['monolog']);
-$app->register(new Silex\Provider\DoctrineServiceProvider(), $app['config']['db']);
-$app->register(new Silex\Provider\TwigServiceProvider(), $app['config']['twig']);
-$app->register(new Silex\Provider\UrlGeneratorServiceProvider());
-//$app->register(new Silex\Provider\SessionServiceProvider());
+if ($app['is_cache'] && $app['cache']->contains('pages')) {
+    $pages = $app['cache']->fetch('pages');
+} else {
+    $pages = $app['page.service']->fetchAll();
+    if ($app['is_cache']) $app['cache']->save('pages', $pages);
+}
 
-$app['starttime'] = $startTime;
+foreach ($pages as $page) {
+    $app->get($page['url'], function(\Dgr\DgrApplication $app) use ($pages, $page) {
+        switch ($page['entity']) {
+            case 'poem':
+            case 'poem_collection':
+                $poem = $app['page.service']->fetch($page['id']);
+                return $app['twig']->render('shimborska.twig', array(
+                    'title' => $page['title'],
+                    'pager' => $app['page.service']->getPager($page, $pages),
+                    'currentPage' => $page['url'],
+                    'contentTable' => $app['page.service']->getContentTable($pages),
+                    'content' => '<h2>' . $poem['title'] . '</h2>' . $poem['content'],
+                    'notes' => $poem['notes'],
+                    'images' => $poem['images'],
+                ));
+                break;
 
-$app['logtime'] = $app->protect(
-    function ($msg = null, $params = array()) use ($app) {
-        $app['monolog']->addDebug(
-            (int)((microtime(true) - $app['starttime']) * 1000) . 'ms ' . ($msg ? "[$msg]" : ''),
-            $params
-        );
-    }
-);
-
-$app->before(
-    function () use ($app) {
-        $app['logtime']('before controller');
-    }
-);
-
-$app->after(
-    function () use ($app) {
-        $app['logtime']('after controller');
-    }
-);
-
-$app->mount('/', new \App\ControllerProvider\Main());
-$app->mount('', new \App\ControllerProvider\Shimborska());
+            case 'page':
+            default:
+                return $app['twig']->render('shimborska.twig', array(
+                    'title' => $page['title'],
+                    'pager' => $app['page.service']->getPager($page, $pages),
+                    'currentPage' => '/',
+                    'contentTable' => $app['page.service']->getContentTable($pages),
+                    'content' => $page['content'],
+                    'notes' => '<div class="note" id="book-note"><h2>Сайт посвящённый польской поэтессе Виславе Шимборской — лауреауту Нобелевской премии 1996&nbsp;года</h2></div>',
+                    'images' => '',
+                ));
+        }
+    });
+}
 
 $app['logtime']('before run');
 $app->run();

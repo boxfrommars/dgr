@@ -49,7 +49,7 @@ $(document).ready(function(){
 
 	/* показать содержание */
 	$('#content').dialog({
-		width: 750,
+		width: 990,
 		autoOpen: false,
 		modal: true
 	});
@@ -77,7 +77,7 @@ $(document).ready(function(){
 		if ($('#content').dialog('isOpen')){
 			$('#content').dialog('close');
 			return false;
-		} 
+		}
 		$('#content').dialog('open');
 		return false;
 	});

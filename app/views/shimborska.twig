@@ -45,11 +45,11 @@
                     <li class="first"><a href="/">Обложка</a><span class="shortkey">(ctrl + ↓)</span></li>
                 {% endif %}
                 {% for key, pagerItem in pager.content %}
-                    {% if pagerItem.class != 'frontpage' %}
+                    {% if pagerItem.name != 'main' %}
                         {%  if pager.id == key %}
                             <li id="center-bottom-nav"><span>{{ key }}</span></li>
                         {% else %}
-                            <li><a title="{{ pagerItem.title }}" href="/{{ pagerItem.parent }}/{{ pagerItem.href }}">{{ key }}</a></li>
+                            <li><a title="{{ pagerItem.title }}" href="{{ pagerItem.url }}">{{ key }}</a></li>
                         {% endif %}
                     {% endif %}
                 {% endfor %}
@@ -69,20 +69,23 @@
                 <li class="chapter-link-list wide"><a href="/" class="chapter-link">Обложка</a></li>
                 {% endif %}
                 {% for collectionItem in contentTable %}
-                    {% if collectionItem.href != '/' %}
                     <li class="chapter-link-list">
-                        <span class="chapter-link">{{ collectionItem.title }}</span>
+                    {% if currentPage == (collectionItem.data.url) %}
+                        <span class="chapter-link active">{{ collectionItem.data.title }}</span>
+                    {% else %}
+                        <a class="chapter-link" href="{{ collectionItem.data.url }}">{{ collectionItem.data.title }}</a>
+                    {% endif %}
+
                         <ul>
                             {% for contentItem in collectionItem.items %}
-                                {% if currentPage == (collectionItem.href ~ '/' ~ contentItem.href) %}
+                                {% if currentPage == (contentItem.url) %}
                                     <li><span class="active">{{ contentItem.title }}</span></li>
                                 {% else %}
-                                    <li><a href="/{{ collectionItem.href }}/{{ contentItem.href }}">{{ contentItem.title }}</a></li>
+                                    <li><a href="{{ contentItem.url }}">{{ contentItem.title }}</a></li>
                                 {% endif %}
                             {% endfor %}
                         </ul>
                     </li>
-                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
